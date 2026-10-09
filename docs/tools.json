@@ -817,7 +817,7 @@
   },
   {
     "name": "script_run",
-    "description": "Run a function; may change data. Requires an API-executable deployment and the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200. OAuth: All OAuth scopes declared/used by the target script (no universal script.run scope). Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "description": "Run a function using deploymentId (API-executable deployment ID, not project ID); may change data. Legacy scriptId is an alias for that deployment ID. Requires the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200. OAuth: All OAuth scopes declared/used by the target script (no universal script.run scope). Requires APPS_SCRIPT_ENABLE_WRITES=true.",
     "write": true,
     "scopes": [
       "All OAuth scopes declared/used by the target script (no universal script.run scope)"
@@ -825,13 +825,19 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "scriptId": {
+        "deploymentId": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+          "pattern": "^[A-Za-z0-9_-]{1,256}$",
+          "description": "API-executable deployment ID from Deploy > Manage deployments; required unless legacy scriptId alias is supplied"
+        },
+        "scriptId": {
+          "$ref": "#/properties/deploymentId",
+          "description": "Deprecated alias for deploymentId; use the API-executable deployment ID, not the project ID"
         },
         "functionName": {
           "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,255}$"
+          "maxLength": 256,
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
         },
         "parameters": {
           "anyOf": [
@@ -858,12 +864,12 @@
           "default": false
         }
       },
-      "required": ["scriptId", "functionName"],
+      "required": ["functionName"],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
     "example": {
-      "scriptId": "scratch-script",
+      "deploymentId": "scratch-api-deployment",
       "functionName": "ping"
     },
     "mockOutput": {

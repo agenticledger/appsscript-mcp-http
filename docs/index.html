@@ -1402,7 +1402,7 @@
           </div>
         </details>
         <details
-          data-search="script_run Run a function; may change data. Requires an API-executable deployment and the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200. OAuth: All OAuth scopes declared/used by the target script (no universal script.run scope). Requires APPS_SCRIPT_ENABLE_WRITES=true."
+          data-search="script_run Run a function using deploymentId (API-executable deployment ID, not project ID); may change data. Legacy scriptId is an alias for that deployment ID. Requires the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200. OAuth: All OAuth scopes declared/used by the target script (no universal script.run scope). Requires APPS_SCRIPT_ENABLE_WRITES=true."
         >
           <summary>
             <span class="kind">WRITE</span>
@@ -1410,19 +1410,20 @@
           </summary>
           <div class="body">
             <p>
-              Run a function; may change data. Requires an API-executable
-              deployment and the SAME standard GCP project as the OAuth client;
-              token must cover ALL script scopes. No service accounts. devMode
-              is for the script owner. A run can return Operation.error despite
-              HTTP 200. OAuth: All OAuth scopes declared/used by the target
-              script (no universal script.run scope). Requires
-              APPS_SCRIPT_ENABLE_WRITES=true.
+              Run a function using deploymentId (API-executable deployment ID,
+              not project ID); may change data. Legacy scriptId is an alias for
+              that deployment ID. Requires the SAME standard GCP project as the
+              OAuth client; token must cover ALL script scopes. No service
+              accounts. devMode is for the script owner. A run can return
+              Operation.error despite HTTP 200. OAuth: All OAuth scopes
+              declared/used by the target script (no universal script.run
+              scope). Requires APPS_SCRIPT_ENABLE_WRITES=true.
             </p>
             <h4>Example arguments</h4>
             <button type="button" class="copy">Copy JSON</button>
             <pre class="example">
 {
-  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;deploymentId&quot;: &quot;scratch-api-deployment&quot;,
   &quot;functionName&quot;: &quot;ping&quot;
 }</pre>
             <h4>Input schema</h4>
@@ -1430,13 +1431,19 @@
 {
   &quot;type&quot;: &quot;object&quot;,
   &quot;properties&quot;: {
-    &quot;scriptId&quot;: {
+    &quot;deploymentId&quot;: {
       &quot;type&quot;: &quot;string&quot;,
-      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;,
+      &quot;description&quot;: &quot;API-executable deployment ID from Deploy &gt; Manage deployments; required unless legacy scriptId alias is supplied&quot;
+    },
+    &quot;scriptId&quot;: {
+      &quot;$ref&quot;: &quot;#/properties/deploymentId&quot;,
+      &quot;description&quot;: &quot;Deprecated alias for deploymentId; use the API-executable deployment ID, not the project ID&quot;
     },
     &quot;functionName&quot;: {
       &quot;type&quot;: &quot;string&quot;,
-      &quot;pattern&quot;: &quot;^[A-Za-z_$][A-Za-z0-9_$]{0,255}$&quot;
+      &quot;maxLength&quot;: 256,
+      &quot;pattern&quot;: &quot;^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*$&quot;
     },
     &quot;parameters&quot;: {
       &quot;anyOf&quot;: [
@@ -1464,7 +1471,6 @@
     }
   },
   &quot;required&quot;: [
-    &quot;scriptId&quot;,
     &quot;functionName&quot;
   ],
   &quot;additionalProperties&quot;: false,

@@ -97,7 +97,7 @@ Upsert is a read-merge-write helper, **not an atomic patch**. `expectedContentHa
 
 ## scripts.run preconditions and limits
 
-Deploy the script as an **API executable**. The script and OAuth client MUST share the same **standard Google Cloud project** with the Apps Script API enabled. The caller needs access and a token covering every scope used by the script, even scopes used by functions other than the requested function. A broker OAuth client in another GCP project cannot run that script just by adding scopes: use a compatible project/client arrangement owned by the broker. Service accounts are unsupported. `devMode:true` only works for the script owner and uses HEAD. Inputs/results must be JSON-compatible values, not Apps Script objects such as a Sheet.
+Deploy the script as an **API executable**. Call `script_run({deploymentId, functionName, parameters})` with the API-executable deployment ID from Deploy → Manage deployments, not the project ID used by other tools. The old `scriptId` input remains a deprecated alias for this deployment ID. Library-qualified names such as `Library.libFunction` are supported. Scripts with no authorization scopes cannot execute through this API; even a scratch `ping` needs an appropriate declared/granted scope (for example `userinfo.email`). The script and OAuth client MUST share the same **standard Google Cloud project** with the Apps Script API enabled. The caller needs access and a token covering every scope used by the script, even scopes used by functions other than the requested function. A broker OAuth client in another GCP project cannot run that script just by adding scopes: use a compatible project/client arrangement owned by the broker. Service accounts are unsupported. `devMode:true` only works for the script owner and uses HEAD. Inputs/results must be JSON-compatible values, not Apps Script objects such as a Sheet.
 
 HTTP 200 can contain `Operation.error`; the MCP preserves the operation and sets `isError:true`. The execution timeout is 370 seconds, other calls 30 seconds; client/gateway timeouts may be shorter. The process history tools expose status, function, timing and type, **not console logs or stack traces**. Use Google Cloud Logging / Apps Script Executions UI for full logs. Metrics are execution/error/active-user counts, not latency.
 
@@ -119,6 +119,7 @@ Ask Ore for a scratch project and secure broker connection first. Verify read ca
 - [Content replacement semantics](https://developers.google.com/apps-script/api/reference/rest/v1/projects/updateContent)
 - [Update an existing deployment](https://developers.google.com/apps-script/api/reference/rest/v1/projects.deployments/update)
 - [Script execution history](https://developers.google.com/apps-script/api/reference/rest/v1/processes/listScriptProcesses)
+- [scripts.run deployment identifier](https://developers.google.com/apps-script/api/reference/rest/v1/scripts/run)
 - [Execute a function and prerequisites](https://developers.google.com/apps-script/api/how-tos/execute)
 - [Enable API access](https://developers.google.com/apps-script/api/how-tos/enable)
 - [Drive search](https://developers.google.com/drive/api/guides/search-files)

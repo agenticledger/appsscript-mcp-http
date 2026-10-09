@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { AppsScriptClient, identifier, type Query } from "./api-client.js";
+import {
+  AppsScriptClient,
+  ApiError,
+  identifier,
+  type Query,
+} from "./api-client.js";
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,256}$/);
 const text = z.string().max(1024);
 const version = z.number().int().positive().max(2147483647);
@@ -361,10 +366,22 @@ tool(
 const params = z.array(z.unknown()).max(100);
 tool(
   "script_run",
-  "Run a function; may change data. Requires an API-executable deployment and the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200.",
+  "Run a function using deploymentId (API-executable deployment ID, not project ID); may change data. Legacy scriptId is an alias for that deployment ID. Requires the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200.",
   z.object({
-    ...script,
-    functionName: z.string().regex(/^[A-Za-z_$][A-Za-z0-9_$]{0,255}$/),
+    deploymentId: id
+      .optional()
+      .describe(
+        "API-executable deployment ID from Deploy > Manage deployments; required unless legacy scriptId alias is supplied",
+      ),
+    scriptId: id
+      .optional()
+      .describe(
+        "Deprecated alias for deploymentId; use the API-executable deployment ID, not the project ID",
+      ),
+    functionName: z
+      .string()
+      .max(256)
+      .regex(/^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*$/),
     parameters: z
       .union([
         params,
@@ -391,13 +408,28 @@ tool(
     "All OAuth scopes declared/used by the target script (no universal script.run scope)",
   ],
   true,
-  { scriptId: "scratch-script", functionName: "ping" },
-  (c, a) =>
-    c.request(`/scripts/${identifier(a.scriptId)}:run`, "POST", {
-      function: a.functionName,
-      parameters: a.parameters ?? [],
-      devMode: a.devMode,
-    }),
+  { deploymentId: "scratch-api-deployment", functionName: "ping" },
+  (c, a) => {
+    if (!a.deploymentId && !a.scriptId)
+      throw new ApiError(
+        "invalid_input",
+        "script_run requires the API-executable deploymentId",
+      );
+    if (a.deploymentId && a.scriptId && a.deploymentId !== a.scriptId)
+      throw new ApiError(
+        "invalid_input",
+        "Supply deploymentId only; the legacy alias conflicts",
+      );
+    return c.request(
+      `/scripts/${identifier(a.deploymentId ?? a.scriptId!)}:run`,
+      "POST",
+      {
+        function: a.functionName,
+        parameters: a.parameters ?? [],
+        devMode: a.devMode,
+      },
+    );
+  },
 );
 export async function executeTool(
   client: AppsScriptClient,

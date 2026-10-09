@@ -351,3 +351,38 @@ test("upsert never drops same-basename files of different types", async () => {
     ),
   });
 });
+
+test("scripts.run uses API-executable deployment ID and supports qualified function names", async () => {
+  let calls = 0;
+  const c = clientWith(async (url, init) => {
+    calls++;
+    assert.equal(
+      new URL(String(url)).pathname,
+      "/v1/scripts/api-deployment:run",
+    );
+    assert.equal(JSON.parse(String(init?.body)).function, "Library.ping");
+    return Response.json({ done: true, response: { result: "pong" } });
+  });
+  await executeTool(c, "script_run", {
+    deploymentId: "api-deployment",
+    functionName: "Library.ping",
+  });
+  await executeTool(c, "script_run", {
+    scriptId: "api-deployment",
+    functionName: "Library.ping",
+  });
+  await assert.rejects(
+    () => executeTool(c, "script_run", { functionName: "ping" }),
+    /deploymentId/,
+  );
+  await assert.rejects(
+    () =>
+      executeTool(c, "script_run", {
+        deploymentId: "api-deployment",
+        scriptId: "different",
+        functionName: "ping",
+      }),
+    /conflicts/,
+  );
+  assert.equal(calls, 2);
+});

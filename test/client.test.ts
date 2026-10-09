@@ -386,3 +386,20 @@ test("scripts.run uses API-executable deployment ID and supports qualified funct
   );
   assert.equal(calls, 2);
 });
+
+test("Drive search degrades on 403 without hiding authentication failures", async () => {
+  const denied = clientWith(
+    async () => new Response("private upstream details", { status: 403 }),
+  );
+  const result = await executeTool(denied, "projects_search", {});
+  assert.equal((result as { status: string }).status, "search_unavailable");
+  assert.match(JSON.stringify(result), /scriptId/);
+  assert(!JSON.stringify(result).includes("private upstream details"));
+  const unauthorized = clientWith(
+    async () => new Response("", { status: 401 }),
+  );
+  await assert.rejects(
+    () => executeTool(unauthorized, "projects_search", {}),
+    (e: unknown) => e instanceof ApiError && e.status === 401,
+  );
+});

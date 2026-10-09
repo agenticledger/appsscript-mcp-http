@@ -247,14 +247,14 @@
             Connect broker provider <code>google-appsscript</code> for the
             intended agent. Request <code>script.projects</code>,
             <code>script.deployments</code>, <code>script.processes</code>,
-            <code>script.metrics</code> and <code>drive.readonly</code> (or
-            <code>drive.file</code>).
+            <code>script.metrics</code> and optionally
+            <code>drive.file</code> for app-authorized-file search.
           </li>
           <li>
             Attach <code>https://appsscriptmcp.agenticledger.ai/mcp</code> with
-            a Google Bearer token, gateway-signed broker principal, or private
-            persistent caller key. Keep credentials in the platform's secure
-            connection flow.
+            a Google Bearer token, executor-stamped broker principal (HMAC
+            required only when configured), or private persistent caller key.
+            Keep credentials in the platform's secure connection flow.
           </li>
           <li>
             The approved Railway production profile enables writes with
@@ -266,14 +266,17 @@
         <p>
           <strong>Running functions:</strong> an API-executable deployment must
           share the OAuth client's standard GCP project, and the token needs
-          every scope used by the script. Process history exposes statuses and
-          timing; full logs remain in Google Cloud Logging / Apps Script
-          Executions.
+          every scope used by the script. Drive search is limited to
+          app-authorized standalone files with <code>drive.file</code>; a 403
+          returns <code>search_unavailable</code> and you can continue using a
+          known scriptId. Process history exposes statuses and timing; full logs
+          remain in Google Cloud Logging / Apps Script Executions.
         </p>
         <p class="note">
-          The inspected broker provider currently requests only
-          <code>script.projects</code>. Its owner must expand the scopes and
-          users must re-consent before the other capabilities work.
+          Reconnect Google to grant all four script scopes; refreshing an old
+          token does not expand consent. The default broker provider omits Drive
+          scopes. Optional search may return <code>search_unavailable</code>;
+          project operations work directly with a scriptId.
         </p>
       </section>
       <section id="reference">
@@ -905,7 +908,7 @@
           </div>
         </details>
         <details
-          data-search="projects_search Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files. OAuth: https://www.googleapis.com/auth/drive.readonly or https://www.googleapis.com/auth/drive.file."
+          data-search="projects_search Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files; a 403 returns search_unavailable with direct-scriptId guidance. OAuth: https://www.googleapis.com/auth/drive.readonly or https://www.googleapis.com/auth/drive.file."
         >
           <summary>
             <span class="kind">READ</span>
@@ -914,7 +917,8 @@
           <div class="body">
             <p>
               Search standalone Apps Script files in Drive; container-bound
-              scripts are not listed. drive.file only sees app-authorized files.
+              scripts are not listed. drive.file only sees app-authorized files;
+              a 403 returns search_unavailable with direct-scriptId guidance.
               OAuth: https://www.googleapis.com/auth/drive.readonly or
               https://www.googleapis.com/auth/drive.file.
             </p>

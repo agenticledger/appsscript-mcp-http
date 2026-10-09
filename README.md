@@ -59,11 +59,11 @@ Requests are stateless: no MCP session ID or server-side user credential cache. 
 ### ccn.finney.finance setup
 
 1. Have tenant `@hub` register `appsscript` in both its MCP registry and UI catalog, URL above, HTTP transport, broker provider `google-appsscript`, broker namespace `google-mcp-prod`.
-2. Have the Connections Broker owner expand the Google Apps Script consent scope set listed below. The currently inspected provider row requests only `script.projects`. Existing consent must be renewed; refresh does not add scopes.
+2. Connect/reconnect broker provider `google-appsscript` with `script.projects`, `script.deployments`, `script.processes`, and `script.metrics`. Existing consent must be renewed; refresh does not add scopes. Drive scopes are omitted from the default provider because OAuth verification for restricted Drive access has not been established. `projects_search` can return `search_unavailable`; use a known scriptId or create a scratch project instead.
 3. Enable the **Google Apps Script API** in the OAuth client's Google Cloud project (and **Drive API** for search). In the Google account that owns/edits the scripts, open https://script.google.com/home/usersettings and turn on **Google Apps Script API**. Missing enablement can produce 403; permissions and scope failures can also produce 403.
 4. In the tenant, attach the MCP to the intended agent and connect Google as that agent. Configure one caller mode above. For broker mode the connect flow must bind the OAuth grant to `google-mcp-prod` and the EXACT `<instanceId>:<agentId>` used on reads. A token granted to a different namespace/agent will not be found. For standalone mode open the MCP-generated consent link instead of a generic Google connect link.
 5. The approved Railway production profile enables publishing/execution. Verify `/health` reports `writesEnabled:true`; an operator can override with `APPS_SCRIPT_ENABLE_WRITES=false`. The platform sends `X-Broker-Principal` by default. HMAC is required only when `/health` reports `principalSignatureRequired:true`; Bearer passthrough and the private caller key remain available.
-6. First proof: run `project_get` and `content_get` on an owner-approved scratch project. Do not use the CCN live portal as a write test.
+6. First proof: create a new scratch project with `project_create`, then run `content_get`, `content_update`, `version_create`, `deployment_create`, `deployment_update`, and `processes_list` on that scratch project only. Do not use the CCN live portal as a write test.
 7. For `script_run`, separately complete API-executable and same-GCP-project requirements below. A web-app deployment alone is insufficient.
 
 ## Scopes
@@ -81,7 +81,7 @@ Scope names below are relative to `https://www.googleapis.com/auth/`:
 | `projects_search`                                             | `drive.readonly` OR `drive.file`                                               |
 | `script_run`                                                  | ALL scopes used by the target script; there is no universal `script.run` scope |
 
-Recommended broker consent set for project management: `script.projects script.deployments script.processes script.metrics drive.readonly`. Choose `drive.file` instead when app-authorized-file-only search is sufficient. The broker must explicitly authorize any additional scopes required by `script_run` (for example `spreadsheets` or `documents`); do not request every Google scope speculatively.
+Core broker consent set for project management: `script.projects script.deployments script.processes script.metrics`. For optional Drive search prefer non-sensitive `drive.file`, which only exposes files authorized to the app; an empty search is not proof no projects exist. `drive.readonly` is restricted and must not be added without checking the OAuth app verification requirements. A Drive 403 returns structured `search_unavailable` with direct-scriptId guidance; it does not disable project operations. The broker must explicitly authorize any additional scopes required by `script_run` (for example `spreadsheets` or `documents`); do not request every Google scope speculatively.
 
 ## Edit → publish → inspect
 

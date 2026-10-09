@@ -468,7 +468,7 @@
   },
   {
     "name": "projects_search",
-    "description": "Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files. OAuth: https://www.googleapis.com/auth/drive.readonly or https://www.googleapis.com/auth/drive.file.",
+    "description": "Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files; a 403 returns search_unavailable with direct-scriptId guidance. OAuth: https://www.googleapis.com/auth/drive.readonly or https://www.googleapis.com/auth/drive.file.",
     "write": false,
     "scopes": [
       "https://www.googleapis.com/auth/drive.readonly",

@@ -228,29 +228,39 @@ tool(
 );
 tool(
   "projects_search",
-  "Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files.",
+  "Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files; a 403 returns search_unavailable with direct-scriptId guidance.",
   z.object({ ...page, nameContains: z.string().max(200).optional() }),
   [scope("drive.readonly"), scope("drive.file")],
   false,
   { nameContains: "Scratch" },
-  (c, a) => {
+  async (c, a) => {
     const escaped = a.nameContains?.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-    return c.request(
-      "/files",
-      "GET",
-      undefined,
-      {
-        q:
-          "trashed = false and mimeType = 'application/vnd.google-apps.script'" +
-          (escaped ? ` and name contains '${escaped}'` : ""),
-        pageSize: a.pageSize ?? 50,
-        pageToken: a.pageToken,
-        fields:
-          "nextPageToken,incompleteSearch,files(id,name,modifiedTime,webViewLink)",
-        orderBy: "modifiedTime desc",
-      },
-      true,
-    );
+    try {
+      return await c.request(
+        "/files",
+        "GET",
+        undefined,
+        {
+          q:
+            "trashed = false and mimeType = 'application/vnd.google-apps.script'" +
+            (escaped ? ` and name contains '${escaped}'` : ""),
+          pageSize: a.pageSize ?? 50,
+          pageToken: a.pageToken,
+          fields:
+            "nextPageToken,incompleteSearch,files(id,name,modifiedTime,webViewLink)",
+          orderBy: "modifiedTime desc",
+        },
+        true,
+      );
+    } catch (error) {
+      if (!(error instanceof ApiError) || error.status !== 403) throw error;
+      return {
+        status: "search_unavailable",
+        message:
+          "Drive search is unavailable. Check Drive consent, file access and Drive API enablement. With drive.file only app-authorized standalone files are visible. Continue using a known scriptId from the Apps Script editor or project_create; project tools do not require Drive search.",
+        suggestedScope: scope("drive.file"),
+      };
+    }
   },
 );
 tool(

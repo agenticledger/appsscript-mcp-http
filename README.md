@@ -38,7 +38,7 @@ Local stdio accepts a short-lived `GOOGLE_ACCESS_TOKEN` from a secure broker/exe
 }
 ```
 
-Set `APPS_SCRIPT_ENABLE_WRITES=true` explicitly on the server to enable create/push/version/deployment/delete/run tools. Writes default off in both transports. A timed-out write may already have completed: inspect remote state before retrying. Writes are never retried automatically.
+Set `APPS_SCRIPT_ENABLE_WRITES=true` explicitly on the server to enable create/push/version/deployment/delete/run tools. Writes default off in both transports. The authorized Railway production profile explicitly opts in through `railway.json` → `node --env-file=railway.env dist/index.js`. That file contains only the non-secret write flag. An existing Railway `APPS_SCRIPT_ENABLE_WRITES=false` variable takes precedence and remains an operator kill switch. Ordinary `npm start` does not load that profile. A timed-out write may already have completed: inspect remote state before retrying. Writes are never retried automatically.
 
 ## Hosted authentication and tenant installation
 
@@ -62,7 +62,7 @@ Requests are stateless: no MCP session ID or server-side user credential cache. 
 2. Have the Connections Broker owner expand the Google Apps Script consent scope set listed below. The currently inspected provider row requests only `script.projects`. Existing consent must be renewed; refresh does not add scopes.
 3. Enable the **Google Apps Script API** in the OAuth client's Google Cloud project (and **Drive API** for search). In the Google account that owns/edits the scripts, open https://script.google.com/home/usersettings and turn on **Google Apps Script API**. Missing enablement can produce 403; permissions and scope failures can also produce 403.
 4. In the tenant, attach the MCP to the intended agent and connect Google as that agent. Configure one caller mode above. For signed mode the connect flow must bind the OAuth grant to `google-mcp-prod` and the EXACT `<instanceId>:<agentId>` used on reads. A token granted to a different namespace/agent will not be found. For standalone mode open the MCP-generated consent link instead of a generic Google connect link.
-5. Have the Railway operator set `APPS_SCRIPT_ENABLE_WRITES=true` to enable publishing/execution after review. Use `/health` to check `writesEnabled`; use signed mode only when `signedPrincipalConfigured=true`.
+5. The approved Railway production profile enables publishing/execution. Verify `/health` reports `writesEnabled:true`; an operator can override with `APPS_SCRIPT_ENABLE_WRITES=false`. Use signed mode only when `signedPrincipalConfigured=true`; otherwise use per-request Google Bearer passthrough or the private caller key.
 6. First proof: run `project_get` and `content_get` on an owner-approved scratch project. Do not use the CCN live portal as a write test.
 7. For `script_run`, separately complete API-executable and same-GCP-project requirements below. A web-app deployment alone is insufficient.
 

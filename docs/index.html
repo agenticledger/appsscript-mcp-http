@@ -257,8 +257,10 @@
             connection flow.
           </li>
           <li>
-            Enable <code>APPS_SCRIPT_ENABLE_WRITES=true</code> on the server
-            before publishing. First verify a scratch project.
+            The approved Railway production profile enables writes with
+            <code>APPS_SCRIPT_ENABLE_WRITES=true</code>; ordinary local startup
+            stays read-only. Verify <code>/health</code> before publishing and
+            first test a scratch project.
           </li>
         </ol>
         <p>

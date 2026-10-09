@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Google Apps Script MCP — REST tool reference</title>
+    <style>
+      :root {
+        --bg-primary: #0a0e1a;
+        --bg-secondary: #0f1629;
+        --bg-card: #111827;
+        --bg-code: #0d1117;
+        --text-primary: #f1f5f9;
+        --text-secondary: #aebbd0;
+        --border-color: #34425b;
+        --accent-green: #86efac;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font:
+          15px/1.7 Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+      }
+      main {
+        max-width: 1120px;
+        margin: auto;
+        padding: 40px 28px 90px;
+      }
+      nav {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        padding-bottom: 36px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      a {
+        color: var(--accent-green);
+      }
+      .hero {
+        padding: 55px 0 35px;
+        max-width: 850px;
+      }
+      .eyebrow {
+        color: var(--accent-green);
+        font: 13px monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      h1 {
+        font-size: clamp(38px, 6vw, 68px);
+        line-height: 1.12;
+        letter-spacing: -0.045em;
+        margin: 20px 0;
+      }
+      h2 {
+        font-size: 26px;
+        line-height: 1.3;
+        margin-top: 48px;
+      }
+      h3 {
+        margin: 0;
+        font-size: 17px;
+      }
+      .lead {
+        font-size: 21px;
+        color: var(--text-secondary);
+        max-width: 700px;
+      }
+      .note {
+        border-left: 3px solid var(--accent-green);
+        padding: 8px 20px;
+        background: var(--bg-secondary);
+      }
+      .workflow {
+        font: 15px monospace;
+        border-block: 1px solid var(--border-color);
+        padding: 24px 0;
+        overflow-wrap: anywhere;
+      }
+      .toolbar {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin: 24px 0;
+        flex-wrap: wrap;
+      }
+      input {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 12px 16px;
+        font: inherit;
+        width: min(100%, 480px);
+      }
+      details {
+        border-top: 1px solid var(--border-color);
+        padding: 20px 0;
+      }
+      summary {
+        cursor: pointer;
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      summary:hover h3 {
+        color: var(--accent-green);
+      }
+      summary .kind {
+        color: var(--text-secondary);
+        font: 12px monospace;
+        width: 48px;
+      }
+      summary .summary-name {
+        font-family: monospace;
+        font-weight: 600;
+      }
+      .body {
+        padding: 12px 0 10px 66px;
+      }
+      .body p {
+        max-width: 850px;
+      }
+      pre {
+        background: var(--bg-code);
+        padding: 20px;
+        overflow: auto;
+        border: 1px solid var(--border-color);
+        font:
+          13px/1.6 ui-monospace,
+          monospace;
+      }
+      button {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--accent-green);
+      }
+      :focus-visible {
+        outline: 2px solid var(--accent-green);
+        outline-offset: 4px;
+      }
+      code {
+        overflow-wrap: anywhere;
+      }
+      small,
+      .muted {
+        color: var(--text-secondary);
+      }
+      li {
+        margin-bottom: 10px;
+      }
+      footer {
+        margin-top: 60px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 24px;
+      }
+      html[data-theme="light"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #edf2f7;
+        --bg-card: #fff;
+        --bg-code: #fff;
+        --text-primary: #172033;
+        --text-secondary: #475569;
+        --border-color: #a6b4c7;
+        --accent-green: #166534;
+      }
+      @media (max-width: 600px) {
+        main {
+          padding: 24px 18px;
+        }
+        .hero {
+          padding-top: 36px;
+        }
+        .body {
+          padding-left: 0;
+        }
+        summary {
+          gap: 10px;
+        }
+        pre {
+          padding: 12px;
+        }
+        .lead {
+          font-size: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav aria-label="Page">
+        <a href="/">Finance MCPs Hub</a><a href="#setup">Connect</a
+        ><a href="#reference">Tool reference</a
+        ><a href="#workflow">Publish workflow</a>
+      </nav>
+      <header class="hero">
+        <span class="eyebrow">Google Workspace / 17 tools / REST v1</span>
+        <h1>Apps Script,<br />from any agent.</h1>
+        <p class="lead">
+          Read code, push changes and update a deployment through Google's API.
+          Keep the web-app URL your users already know.
+        </p>
+        <p class="muted">
+          No local clasp installation. Broker-owned Google credentials.
+        </p>
+        <!-- MCP_HERO_ACTIONS -->
+      </header>
+      <p class="note">
+        <strong>Verification:</strong> examples below use mock fixtures. Real
+        Google integration awaits an authorized scratch-project test. Writes
+        require explicit server enablement.
+      </p>
+      <section id="workflow">
+        <h2>Publish without changing the link</h2>
+        <p class="workflow">
+          content_get → content_update (upsert) → version_create →
+          deployment_update → script_processes_list
+        </p>
+        <p>
+          Use the existing deployment ID. A new deployment creates a new URL.
+          Upsert preserves omitted files; full replacement deletes them.
+          Concurrent editor changes can race the read-merge-write operation.
+        </p>
+      </section>
+      <section id="setup">
+        <h2>Connect once, then call</h2>
+        <ol>
+          <li>
+            Enable Apps Script API in your Google Cloud project and at
+            <a href="https://script.google.com/home/usersettings"
+              >Google Apps Script user settings</a
+            >.
+          </li>
+          <li>
+            Connect broker provider <code>google-appsscript</code> for the
+            intended agent. Request <code>script.projects</code>,
+            <code>script.deployments</code>, <code>script.processes</code>,
+            <code>script.metrics</code> and <code>drive.readonly</code> (or
+            <code>drive.file</code>).
+          </li>
+          <li>
+            Attach <code>https://appsscriptmcp.agenticledger.ai/mcp</code> with
+            a Google Bearer token, gateway-signed broker principal, or private
+            persistent caller key. Keep credentials in the platform's secure
+            connection flow.
+          </li>
+          <li>
+            Enable <code>APPS_SCRIPT_ENABLE_WRITES=true</code> on the server
+            before publishing. First verify a scratch project.
+          </li>
+        </ol>
+        <p>
+          <strong>Running functions:</strong> an API-executable deployment must
+          share the OAuth client's standard GCP project, and the token needs
+          every scope used by the script. Process history exposes statuses and
+          timing; full logs remain in Google Cloud Logging / Apps Script
+          Executions.
+        </p>
+        <p class="note">
+          The inspected broker provider currently requests only
+          <code>script.projects</code>. Its owner must expand the scopes and
+          users must re-consent before the other capabilities work.
+        </p>
+      </section>
+      <section id="reference">
+        <h2>Tool reference</h2>
+        <div class="toolbar">
+          <label for="search">Find a tool</label
+          ><input
+            id="search"
+            type="search"
+            placeholder="Search name, purpose or scope"
+          /><span id="count" role="status">17 tools</span>
+        </div>
+        <details
+          data-search="project_get Read project metadata. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">project_get</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Read project metadata. OAuth:
+              https://www.googleapis.com/auth/script.projects or
+              https://www.googleapis.com/auth/script.projects.readonly.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;scriptId&quot;: &quot;scratch-script&quot;,
+    &quot;title&quot;: &quot;Mock scratch&quot;
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="content_get Pull all files at HEAD or an immutable version; returns contentHash for conflict checks. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">content_get</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Pull all files at HEAD or an immutable version; returns
+              contentHash for conflict checks. OAuth:
+              https://www.googleapis.com/auth/script.projects or
+              https://www.googleapis.com/auth/script.projects.readonly.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;versionNumber&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;exclusiveMinimum&quot;: 0,
+      &quot;maximum&quot;: 2147483647
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;scriptId&quot;: &quot;scratch-script&quot;,
+    &quot;files&quot;: [
+      {
+        &quot;name&quot;: &quot;appsscript&quot;,
+        &quot;type&quot;: &quot;JSON&quot;,
+        &quot;source&quot;: &quot;{\&quot;timeZone\&quot;:\&quot;Etc/UTC\&quot;,\&quot;runtimeVersion\&quot;:\&quot;V8\&quot;}&quot;
+      },
+      {
+        &quot;name&quot;: &quot;Code&quot;,
+        &quot;type&quot;: &quot;SERVER_JS&quot;,
+        &quot;source&quot;: &quot;function ping() { return \&quot;pong\&quot;; }&quot;
+      }
+    ],
+    &quot;contentHash&quot;: &quot;afa4051ce5cdf3dfa889368482814bc25135ae3a6ed78dd2f5d18721570019cb&quot;
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="versions_list List immutable versions. Use nextPageToken for the next bounded page. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">versions_list</h3>
+          </summary>
+          <div class="body">
+            <p>
+              List immutable versions. Use nextPageToken for the next bounded
+              page. OAuth: https://www.googleapis.com/auth/script.projects or
+              https://www.googleapis.com/auth/script.projects.readonly.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;pageSize&quot;: 20
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;pageSize&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 100
+    },
+    &quot;pageToken&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 4096
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;versions&quot;: [
+      {
+        &quot;versionNumber&quot;: 1,
+        &quot;description&quot;: &quot;Mock version&quot;
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="version_get Read one immutable version. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">version_get</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Read one immutable version. OAuth:
+              https://www.googleapis.com/auth/script.projects or
+              https://www.googleapis.com/auth/script.projects.readonly.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;versionNumber&quot;: 1
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;versionNumber&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;exclusiveMinimum&quot;: 0,
+      &quot;maximum&quot;: 2147483647
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;versionNumber&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;versionNumber&quot;: 1
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="deployments_list List deployments and entry-point URLs. OAuth: https://www.googleapis.com/auth/script.deployments or https://www.googleapis.com/auth/script.deployments.readonly."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">deployments_list</h3>
+          </summary>
+          <div class="body">
+            <p>
+              List deployments and entry-point URLs. OAuth:
+              https://www.googleapis.com/auth/script.deployments or
+              https://www.googleapis.com/auth/script.deployments.readonly.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;pageSize&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 100
+    },
+    &quot;pageToken&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 4096
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;deployments&quot;: [
+      {
+        &quot;deploymentId&quot;: &quot;scratch-deployment&quot;,
+        &quot;deploymentConfig&quot;: {
+          &quot;versionNumber&quot;: 1,
+          &quot;manifestFileName&quot;: &quot;appsscript&quot;
+        }
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="deployment_get Read a deployment and its entry points. OAuth: https://www.googleapis.com/auth/script.deployments or https://www.googleapis.com/auth/script.deployments.readonly."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">deployment_get</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Read a deployment and its entry points. OAuth:
+              https://www.googleapis.com/auth/script.deployments or
+              https://www.googleapis.com/auth/script.deployments.readonly.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;deploymentId&quot;: &quot;scratch-deployment&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;deploymentId&quot;: {
+      &quot;$ref&quot;: &quot;#/properties/scriptId&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;deploymentId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;deploymentId&quot;: &quot;scratch-deployment&quot;,
+    &quot;deploymentConfig&quot;: {
+      &quot;scriptId&quot;: &quot;scratch-script&quot;,
+      &quot;versionNumber&quot;: 1,
+      &quot;manifestFileName&quot;: &quot;appsscript&quot;,
+      &quot;description&quot;: &quot;Mock&quot;
+    },
+    &quot;entryPoints&quot;: [
+      {
+        &quot;entryPointType&quot;: &quot;WEB_APP&quot;,
+        &quot;webApp&quot;: {
+          &quot;url&quot;: &quot;https://script.google.com/macros/s/scratch-deployment/exec&quot;
+        }
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="processes_list Execution history across projects; statuses include FAILED. This is metadata, not console logs or stack traces. OAuth: https://www.googleapis.com/auth/script.processes."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">processes_list</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Execution history across projects; statuses include FAILED. This
+              is metadata, not console logs or stack traces. OAuth:
+              https://www.googleapis.com/auth/script.processes.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;filter&quot;: {
+    &quot;statuses&quot;: [
+      &quot;FAILED&quot;
+    ]
+  }
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;pageSize&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 100
+    },
+    &quot;pageToken&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 4096
+    },
+    &quot;filter&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;deploymentId&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+        },
+        &quot;functionName&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;maxLength&quot;: 1024
+        },
+        &quot;startTime&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;date-time&quot;
+        },
+        &quot;endTime&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;date-time&quot;
+        },
+        &quot;statuses&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;enum&quot;: [
+              &quot;RUNNING&quot;,
+              &quot;PAUSED&quot;,
+              &quot;COMPLETED&quot;,
+              &quot;CANCELED&quot;,
+              &quot;FAILED&quot;,
+              &quot;TIMED_OUT&quot;,
+              &quot;UNKNOWN&quot;,
+              &quot;DELAYED&quot;
+            ]
+          },
+          &quot;maxItems&quot;: 8
+        },
+        &quot;scriptId&quot;: {
+          &quot;$ref&quot;: &quot;#/properties/filter/properties/deploymentId&quot;
+        },
+        &quot;projectName&quot;: {
+          &quot;$ref&quot;: &quot;#/properties/filter/properties/functionName&quot;
+        }
+      },
+      &quot;additionalProperties&quot;: false
+    }
+  },
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;processes&quot;: [
+      {
+        &quot;functionName&quot;: &quot;ping&quot;,
+        &quot;processStatus&quot;: &quot;COMPLETED&quot;,
+        &quot;processType&quot;: &quot;EXECUTION_API&quot;,
+        &quot;duration&quot;: &quot;0.1s&quot;
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="script_processes_list Execution history for one script; metadata and error status, not full Cloud Logging messages. OAuth: https://www.googleapis.com/auth/script.processes."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">script_processes_list</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Execution history for one script; metadata and error status, not
+              full Cloud Logging messages. OAuth:
+              https://www.googleapis.com/auth/script.processes.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;filter&quot;: {
+    &quot;statuses&quot;: [
+      &quot;FAILED&quot;
+    ]
+  }
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;pageSize&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 100
+    },
+    &quot;pageToken&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 4096
+    },
+    &quot;filter&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;deploymentId&quot;: {
+          &quot;$ref&quot;: &quot;#/properties/scriptId&quot;
+        },
+        &quot;functionName&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;maxLength&quot;: 1024
+        },
+        &quot;startTime&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;date-time&quot;
+        },
+        &quot;endTime&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;date-time&quot;
+        },
+        &quot;statuses&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;enum&quot;: [
+              &quot;RUNNING&quot;,
+              &quot;PAUSED&quot;,
+              &quot;COMPLETED&quot;,
+              &quot;CANCELED&quot;,
+              &quot;FAILED&quot;,
+              &quot;TIMED_OUT&quot;,
+              &quot;UNKNOWN&quot;,
+              &quot;DELAYED&quot;
+            ]
+          },
+          &quot;maxItems&quot;: 8
+        }
+      },
+      &quot;additionalProperties&quot;: false
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;processes&quot;: [
+      {
+        &quot;functionName&quot;: &quot;ping&quot;,
+        &quot;processStatus&quot;: &quot;COMPLETED&quot;,
+        &quot;processType&quot;: &quot;EXECUTION_API&quot;,
+        &quot;duration&quot;: &quot;0.1s&quot;
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="metrics_get Read execution, failed-execution and active-user counts (not latency). OAuth: https://www.googleapis.com/auth/script.metrics."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">metrics_get</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Read execution, failed-execution and active-user counts (not
+              latency). OAuth: https://www.googleapis.com/auth/script.metrics.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;metricsGranularity&quot;: &quot;DAILY&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;metricsGranularity&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;WEEKLY&quot;,
+        &quot;DAILY&quot;
+      ],
+      &quot;default&quot;: &quot;DAILY&quot;
+    },
+    &quot;deploymentId&quot;: {
+      &quot;$ref&quot;: &quot;#/properties/scriptId&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;metricsGranularity&quot;: &quot;DAILY&quot;,
+    &quot;totalExecutions&quot;: [
+      {
+        &quot;startTime&quot;: &quot;2026-01-01T00:00:00Z&quot;,
+        &quot;endTime&quot;: &quot;2026-01-02T00:00:00Z&quot;,
+        &quot;value&quot;: &quot;1&quot;
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="projects_search Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files. OAuth: https://www.googleapis.com/auth/drive.readonly or https://www.googleapis.com/auth/drive.file."
+        >
+          <summary>
+            <span class="kind">READ</span>
+            <h3 class="summary-name">projects_search</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Search standalone Apps Script files in Drive; container-bound
+              scripts are not listed. drive.file only sees app-authorized files.
+              OAuth: https://www.googleapis.com/auth/drive.readonly or
+              https://www.googleapis.com/auth/drive.file.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;nameContains&quot;: &quot;Scratch&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;pageSize&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 100
+    },
+    &quot;pageToken&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 4096
+    },
+    &quot;nameContains&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 200
+    }
+  },
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;files&quot;: [
+      {
+        &quot;id&quot;: &quot;scratch-script&quot;,
+        &quot;name&quot;: &quot;Mock scratch&quot;
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="project_create Create a standalone project, or bind it to a Sheet/Doc/Slides/Form with parentId. Creates a remote resource. OAuth: https://www.googleapis.com/auth/script.projects. Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">project_create</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Create a standalone project, or bind it to a Sheet/Doc/Slides/Form
+              with parentId. Creates a remote resource. OAuth:
+              https://www.googleapis.com/auth/script.projects. Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;title&quot;: &quot;MCP scratch&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;title&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;minLength&quot;: 1,
+      &quot;maxLength&quot;: 256
+    },
+    &quot;parentId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;title&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;scriptId&quot;: &quot;scratch-script&quot;,
+    &quot;title&quot;: &quot;MCP scratch&quot;
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="content_update Push files. Default upsert reads HEAD, merges by name and type and preserves omitted files. replace DELETES all omitted files and needs confirmReplace=true. Both write the complete file set; concurrent editor changes can race even with expectedContentHash. HEAD changes affect triggers immediately. OAuth: https://www.googleapis.com/auth/script.projects. Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">content_update</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Push files. Default upsert reads HEAD, merges by name and type and
+              preserves omitted files. replace DELETES all omitted files and
+              needs confirmReplace=true. Both write the complete file set;
+              concurrent editor changes can race even with expectedContentHash.
+              HEAD changes affect triggers immediately. OAuth:
+              https://www.googleapis.com/auth/script.projects. Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;mode&quot;: &quot;upsert&quot;,
+  &quot;files&quot;: [
+    {
+      &quot;name&quot;: &quot;Code&quot;,
+      &quot;type&quot;: &quot;SERVER_JS&quot;,
+      &quot;source&quot;: &quot;function ping() { return \&quot;pong\&quot;; }&quot;
+    }
+  ]
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;files&quot;: {
+      &quot;anyOf&quot;: [
+        {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {
+              &quot;name&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;minLength&quot;: 1,
+                &quot;maxLength&quot;: 256
+              },
+              &quot;type&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;enum&quot;: [
+                  &quot;SERVER_JS&quot;,
+                  &quot;HTML&quot;,
+                  &quot;JSON&quot;
+                ]
+              },
+              &quot;source&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;maxLength&quot;: 4194304
+              }
+            },
+            &quot;required&quot;: [
+              &quot;name&quot;,
+              &quot;type&quot;,
+              &quot;source&quot;
+            ],
+            &quot;additionalProperties&quot;: false
+          },
+          &quot;minItems&quot;: 1,
+          &quot;maxItems&quot;: 200
+        },
+        {
+          &quot;allOf&quot;: [
+            {
+              &quot;type&quot;: &quot;string&quot;,
+              &quot;maxLength&quot;: 8388608
+            },
+            {
+              &quot;$ref&quot;: &quot;#/properties/files/anyOf/0&quot;
+            }
+          ]
+        }
+      ]
+    },
+    &quot;mode&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;upsert&quot;,
+        &quot;replace&quot;
+      ],
+      &quot;default&quot;: &quot;upsert&quot;
+    },
+    &quot;confirmReplace&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;expectedContentHash&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[a-f0-9]{64}$&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;files&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;scriptId&quot;: &quot;scratch-script&quot;,
+    &quot;files&quot;: [
+      {
+        &quot;name&quot;: &quot;appsscript&quot;,
+        &quot;type&quot;: &quot;JSON&quot;,
+        &quot;source&quot;: &quot;{\&quot;timeZone\&quot;:\&quot;Etc/UTC\&quot;,\&quot;runtimeVersion\&quot;:\&quot;V8\&quot;}&quot;
+      },
+      {
+        &quot;name&quot;: &quot;Code&quot;,
+        &quot;type&quot;: &quot;SERVER_JS&quot;,
+        &quot;source&quot;: &quot;function ping() { return \&quot;pong\&quot;; }&quot;
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="version_create Snapshot current HEAD into a new immutable version. OAuth: https://www.googleapis.com/auth/script.projects. Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">version_create</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Snapshot current HEAD into a new immutable version. OAuth:
+              https://www.googleapis.com/auth/script.projects. Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;description&quot;: &quot;Scratch release&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;description&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 1024
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;versionNumber&quot;: 1,
+    &quot;description&quot;: &quot;Scratch release&quot;
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="deployment_create Create a NEW deployment URL from a saved version. For an existing web app use deployment_update to retain /exec URL. OAuth: https://www.googleapis.com/auth/script.deployments. Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">deployment_create</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Create a NEW deployment URL from a saved version. For an existing
+              web app use deployment_update to retain /exec URL. OAuth:
+              https://www.googleapis.com/auth/script.deployments. Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;versionNumber&quot;: 1
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;versionNumber&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;exclusiveMinimum&quot;: 0,
+      &quot;maximum&quot;: 2147483647
+    },
+    &quot;description&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 1024
+    },
+    &quot;manifestFileName&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;minLength&quot;: 1,
+      &quot;maxLength&quot;: 256,
+      &quot;default&quot;: &quot;appsscript&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;versionNumber&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;deploymentId&quot;: &quot;scratch-deployment&quot;,
+    &quot;deploymentConfig&quot;: {
+      &quot;versionNumber&quot;: 1,
+      &quot;manifestFileName&quot;: &quot;appsscript&quot;
+    }
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="deployment_update Point an EXISTING deployment at a saved version; retains deployment ID and web-app /exec URL. Reads and preserves omitted description/manifest fields. OAuth: https://www.googleapis.com/auth/script.deployments. Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">deployment_update</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Point an EXISTING deployment at a saved version; retains
+              deployment ID and web-app /exec URL. Reads and preserves omitted
+              description/manifest fields. OAuth:
+              https://www.googleapis.com/auth/script.deployments. Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;deploymentId&quot;: &quot;scratch-deployment&quot;,
+  &quot;versionNumber&quot;: 2
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;deploymentId&quot;: {
+      &quot;$ref&quot;: &quot;#/properties/scriptId&quot;
+    },
+    &quot;versionNumber&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;exclusiveMinimum&quot;: 0,
+      &quot;maximum&quot;: 2147483647
+    },
+    &quot;description&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;maxLength&quot;: 1024
+    },
+    &quot;manifestFileName&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;minLength&quot;: 1,
+      &quot;maxLength&quot;: 256
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;deploymentId&quot;,
+    &quot;versionNumber&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;deploymentId&quot;: &quot;scratch-deployment&quot;,
+    &quot;deploymentConfig&quot;: {
+      &quot;scriptId&quot;: &quot;scratch-script&quot;,
+      &quot;versionNumber&quot;: 2,
+      &quot;description&quot;: &quot;Mock&quot;,
+      &quot;manifestFileName&quot;: &quot;appsscript&quot;
+    },
+    &quot;entryPoints&quot;: [
+      {
+        &quot;entryPointType&quot;: &quot;WEB_APP&quot;,
+        &quot;webApp&quot;: {
+          &quot;url&quot;: &quot;https://script.google.com/macros/s/scratch-deployment/exec&quot;
+        }
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="deployment_delete Delete a deployment; its URL stops working. Requires confirmDelete=true. OAuth: https://www.googleapis.com/auth/script.deployments. Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">deployment_delete</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Delete a deployment; its URL stops working. Requires
+              confirmDelete=true. OAuth:
+              https://www.googleapis.com/auth/script.deployments. Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;deploymentId&quot;: &quot;scratch-deployment&quot;,
+  &quot;confirmDelete&quot;: true
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;deploymentId&quot;: {
+      &quot;$ref&quot;: &quot;#/properties/scriptId&quot;
+    },
+    &quot;confirmDelete&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;,
+      &quot;const&quot;: true
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;deploymentId&quot;,
+    &quot;confirmDelete&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {}
+}</pre>
+          </div>
+        </details>
+        <details
+          data-search="script_run Run a function; may change data. Requires an API-executable deployment and the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200. OAuth: All OAuth scopes declared/used by the target script (no universal script.run scope). Requires APPS_SCRIPT_ENABLE_WRITES=true."
+        >
+          <summary>
+            <span class="kind">WRITE</span>
+            <h3 class="summary-name">script_run</h3>
+          </summary>
+          <div class="body">
+            <p>
+              Run a function; may change data. Requires an API-executable
+              deployment and the SAME standard GCP project as the OAuth client;
+              token must cover ALL script scopes. No service accounts. devMode
+              is for the script owner. A run can return Operation.error despite
+              HTTP 200. OAuth: All OAuth scopes declared/used by the target
+              script (no universal script.run scope). Requires
+              APPS_SCRIPT_ENABLE_WRITES=true.
+            </p>
+            <h4>Example arguments</h4>
+            <button type="button" class="copy">Copy JSON</button>
+            <pre class="example">
+{
+  &quot;scriptId&quot;: &quot;scratch-script&quot;,
+  &quot;functionName&quot;: &quot;ping&quot;
+}</pre>
+            <h4>Input schema</h4>
+            <pre>
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;scriptId&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z0-9_-]{1,256}$&quot;
+    },
+    &quot;functionName&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;pattern&quot;: &quot;^[A-Za-z_$][A-Za-z0-9_$]{0,255}$&quot;
+    },
+    &quot;parameters&quot;: {
+      &quot;anyOf&quot;: [
+        {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {},
+          &quot;maxItems&quot;: 100
+        },
+        {
+          &quot;allOf&quot;: [
+            {
+              &quot;type&quot;: &quot;string&quot;,
+              &quot;maxLength&quot;: 1048576
+            },
+            {
+              &quot;$ref&quot;: &quot;#/properties/parameters/anyOf/0&quot;
+            }
+          ]
+        }
+      ]
+    },
+    &quot;devMode&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;,
+      &quot;default&quot;: false
+    }
+  },
+  &quot;required&quot;: [
+    &quot;scriptId&quot;,
+    &quot;functionName&quot;
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;
+}</pre>
+            <h4>Mock response — not live data</h4>
+            <pre>
+{
+  &quot;mode&quot;: &quot;mock&quot;,
+  &quot;data&quot;: {
+    &quot;done&quot;: true,
+    &quot;response&quot;: {
+      &quot;result&quot;: &quot;pong&quot;
+    }
+  }
+}</pre>
+          </div>
+        </details>
+      </section>
+      <footer>
+        <a href="https://developers.google.com/apps-script/api/reference/rest"
+          >Google API reference</a
+        >
+        · <a href="tools.json">Machine-readable tools</a>
+        <p class="muted">
+          AgenticLedger · Apps Script REST MCP v3.0.0 · No provider credentials
+          stored here.
+        </p>
+      </footer>
+    </main>
+    <script>
+      document.querySelector("#search").addEventListener("input", (event) => {
+        const query = event.target.value.toLowerCase();
+        let count = 0;
+        document.querySelectorAll("details").forEach((item) => {
+          item.hidden = !item.dataset.search.toLowerCase().includes(query);
+          if (!item.hidden) count++;
+        });
+        document.querySelector("#count").textContent = count + " tools";
+      });
+      document.querySelectorAll(".copy").forEach((button) =>
+        button.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(
+              button.nextElementSibling.textContent,
+            );
+            button.textContent = "Copied";
+          } catch {
+            button.textContent = "Select and copy the JSON below";
+          }
+        }),
+      );
+    </script>
+  </body>
+</html>

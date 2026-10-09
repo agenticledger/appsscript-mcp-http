@@ -1,0 +1,879 @@
+[
+  {
+    "name": "project_get",
+    "description": "Read project metadata. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/script.projects",
+      "https://www.googleapis.com/auth/script.projects.readonly"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "scriptId": "scratch-script",
+        "title": "Mock scratch"
+      }
+    }
+  },
+  {
+    "name": "content_get",
+    "description": "Pull all files at HEAD or an immutable version; returns contentHash for conflict checks. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/script.projects",
+      "https://www.googleapis.com/auth/script.projects.readonly"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "scriptId": "scratch-script",
+        "files": [
+          {
+            "name": "appsscript",
+            "type": "JSON",
+            "source": "{\"timeZone\":\"Etc/UTC\",\"runtimeVersion\":\"V8\"}"
+          },
+          {
+            "name": "Code",
+            "type": "SERVER_JS",
+            "source": "function ping() { return \"pong\"; }"
+          }
+        ],
+        "contentHash": "afa4051ce5cdf3dfa889368482814bc25135ae3a6ed78dd2f5d18721570019cb"
+      }
+    }
+  },
+  {
+    "name": "versions_list",
+    "description": "List immutable versions. Use nextPageToken for the next bounded page. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/script.projects",
+      "https://www.googleapis.com/auth/script.projects.readonly"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "pageToken": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "pageSize": 20
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "versions": [
+          {
+            "versionNumber": 1,
+            "description": "Mock version"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "version_get",
+    "description": "Read one immutable version. OAuth: https://www.googleapis.com/auth/script.projects or https://www.googleapis.com/auth/script.projects.readonly.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/script.projects",
+      "https://www.googleapis.com/auth/script.projects.readonly"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": ["scriptId", "versionNumber"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "versionNumber": 1
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "versionNumber": 1
+      }
+    }
+  },
+  {
+    "name": "deployments_list",
+    "description": "List deployments and entry-point URLs. OAuth: https://www.googleapis.com/auth/script.deployments or https://www.googleapis.com/auth/script.deployments.readonly.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/script.deployments",
+      "https://www.googleapis.com/auth/script.deployments.readonly"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "pageToken": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "deployments": [
+          {
+            "deploymentId": "scratch-deployment",
+            "deploymentConfig": {
+              "versionNumber": 1,
+              "manifestFileName": "appsscript"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "deployment_get",
+    "description": "Read a deployment and its entry points. OAuth: https://www.googleapis.com/auth/script.deployments or https://www.googleapis.com/auth/script.deployments.readonly.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/script.deployments",
+      "https://www.googleapis.com/auth/script.deployments.readonly"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "deploymentId": {
+          "$ref": "#/properties/scriptId"
+        }
+      },
+      "required": ["scriptId", "deploymentId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "deploymentId": "scratch-deployment"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "deploymentId": "scratch-deployment",
+        "deploymentConfig": {
+          "scriptId": "scratch-script",
+          "versionNumber": 1,
+          "manifestFileName": "appsscript",
+          "description": "Mock"
+        },
+        "entryPoints": [
+          {
+            "entryPointType": "WEB_APP",
+            "webApp": {
+              "url": "https://script.google.com/macros/s/scratch-deployment/exec"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "processes_list",
+    "description": "Execution history across projects; statuses include FAILED. This is metadata, not console logs or stack traces. OAuth: https://www.googleapis.com/auth/script.processes.",
+    "write": false,
+    "scopes": ["https://www.googleapis.com/auth/script.processes"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "pageToken": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "filter": {
+          "type": "object",
+          "properties": {
+            "deploymentId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,256}$"
+            },
+            "functionName": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "startTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "endTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "statuses": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "RUNNING",
+                  "PAUSED",
+                  "COMPLETED",
+                  "CANCELED",
+                  "FAILED",
+                  "TIMED_OUT",
+                  "UNKNOWN",
+                  "DELAYED"
+                ]
+              },
+              "maxItems": 8
+            },
+            "scriptId": {
+              "$ref": "#/properties/filter/properties/deploymentId"
+            },
+            "projectName": {
+              "$ref": "#/properties/filter/properties/functionName"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "filter": {
+        "statuses": ["FAILED"]
+      }
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "processes": [
+          {
+            "functionName": "ping",
+            "processStatus": "COMPLETED",
+            "processType": "EXECUTION_API",
+            "duration": "0.1s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "script_processes_list",
+    "description": "Execution history for one script; metadata and error status, not full Cloud Logging messages. OAuth: https://www.googleapis.com/auth/script.processes.",
+    "write": false,
+    "scopes": ["https://www.googleapis.com/auth/script.processes"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "pageToken": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "filter": {
+          "type": "object",
+          "properties": {
+            "deploymentId": {
+              "$ref": "#/properties/scriptId"
+            },
+            "functionName": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "startTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "endTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "statuses": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "RUNNING",
+                  "PAUSED",
+                  "COMPLETED",
+                  "CANCELED",
+                  "FAILED",
+                  "TIMED_OUT",
+                  "UNKNOWN",
+                  "DELAYED"
+                ]
+              },
+              "maxItems": 8
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "filter": {
+        "statuses": ["FAILED"]
+      }
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "processes": [
+          {
+            "functionName": "ping",
+            "processStatus": "COMPLETED",
+            "processType": "EXECUTION_API",
+            "duration": "0.1s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "metrics_get",
+    "description": "Read execution, failed-execution and active-user counts (not latency). OAuth: https://www.googleapis.com/auth/script.metrics.",
+    "write": false,
+    "scopes": ["https://www.googleapis.com/auth/script.metrics"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "metricsGranularity": {
+          "type": "string",
+          "enum": ["WEEKLY", "DAILY"],
+          "default": "DAILY"
+        },
+        "deploymentId": {
+          "$ref": "#/properties/scriptId"
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "metricsGranularity": "DAILY"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "metricsGranularity": "DAILY",
+        "totalExecutions": [
+          {
+            "startTime": "2026-01-01T00:00:00Z",
+            "endTime": "2026-01-02T00:00:00Z",
+            "value": "1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "projects_search",
+    "description": "Search standalone Apps Script files in Drive; container-bound scripts are not listed. drive.file only sees app-authorized files. OAuth: https://www.googleapis.com/auth/drive.readonly or https://www.googleapis.com/auth/drive.file.",
+    "write": false,
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.file"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "pageToken": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "nameContains": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "nameContains": "Scratch"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "files": [
+          {
+            "id": "scratch-script",
+            "name": "Mock scratch"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "project_create",
+    "description": "Create a standalone project, or bind it to a Sheet/Doc/Slides/Form with parentId. Creates a remote resource. OAuth: https://www.googleapis.com/auth/script.projects. Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": ["https://www.googleapis.com/auth/script.projects"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "parentId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        }
+      },
+      "required": ["title"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "title": "MCP scratch"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "scriptId": "scratch-script",
+        "title": "MCP scratch"
+      }
+    }
+  },
+  {
+    "name": "content_update",
+    "description": "Push files. Default upsert reads HEAD, merges by name and type and preserves omitted files. replace DELETES all omitted files and needs confirmReplace=true. Both write the complete file set; concurrent editor changes can race even with expectedContentHash. HEAD changes affect triggers immediately. OAuth: https://www.googleapis.com/auth/script.projects. Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": ["https://www.googleapis.com/auth/script.projects"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "files": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["SERVER_JS", "HTML", "JSON"]
+                  },
+                  "source": {
+                    "type": "string",
+                    "maxLength": 4194304
+                  }
+                },
+                "required": ["name", "type", "source"],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 200
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string",
+                  "maxLength": 8388608
+                },
+                {
+                  "$ref": "#/properties/files/anyOf/0"
+                }
+              ]
+            }
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["upsert", "replace"],
+          "default": "upsert"
+        },
+        "confirmReplace": {
+          "type": "boolean"
+        },
+        "expectedContentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": ["scriptId", "files"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "mode": "upsert",
+      "files": [
+        {
+          "name": "Code",
+          "type": "SERVER_JS",
+          "source": "function ping() { return \"pong\"; }"
+        }
+      ]
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "scriptId": "scratch-script",
+        "files": [
+          {
+            "name": "appsscript",
+            "type": "JSON",
+            "source": "{\"timeZone\":\"Etc/UTC\",\"runtimeVersion\":\"V8\"}"
+          },
+          {
+            "name": "Code",
+            "type": "SERVER_JS",
+            "source": "function ping() { return \"pong\"; }"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "version_create",
+    "description": "Snapshot current HEAD into a new immutable version. OAuth: https://www.googleapis.com/auth/script.projects. Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": ["https://www.googleapis.com/auth/script.projects"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1024
+        }
+      },
+      "required": ["scriptId"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "description": "Scratch release"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "versionNumber": 1,
+        "description": "Scratch release"
+      }
+    }
+  },
+  {
+    "name": "deployment_create",
+    "description": "Create a NEW deployment URL from a saved version. For an existing web app use deployment_update to retain /exec URL. OAuth: https://www.googleapis.com/auth/script.deployments. Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": ["https://www.googleapis.com/auth/script.deployments"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "manifestFileName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "default": "appsscript"
+        }
+      },
+      "required": ["scriptId", "versionNumber"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "versionNumber": 1
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "deploymentId": "scratch-deployment",
+        "deploymentConfig": {
+          "versionNumber": 1,
+          "manifestFileName": "appsscript"
+        }
+      }
+    }
+  },
+  {
+    "name": "deployment_update",
+    "description": "Point an EXISTING deployment at a saved version; retains deployment ID and web-app /exec URL. Reads and preserves omitted description/manifest fields. OAuth: https://www.googleapis.com/auth/script.deployments. Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": ["https://www.googleapis.com/auth/script.deployments"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "deploymentId": {
+          "$ref": "#/properties/scriptId"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "manifestFileName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": ["scriptId", "deploymentId", "versionNumber"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "deploymentId": "scratch-deployment",
+      "versionNumber": 2
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "deploymentId": "scratch-deployment",
+        "deploymentConfig": {
+          "scriptId": "scratch-script",
+          "versionNumber": 2,
+          "description": "Mock",
+          "manifestFileName": "appsscript"
+        },
+        "entryPoints": [
+          {
+            "entryPointType": "WEB_APP",
+            "webApp": {
+              "url": "https://script.google.com/macros/s/scratch-deployment/exec"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "deployment_delete",
+    "description": "Delete a deployment; its URL stops working. Requires confirmDelete=true. OAuth: https://www.googleapis.com/auth/script.deployments. Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": ["https://www.googleapis.com/auth/script.deployments"],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "deploymentId": {
+          "$ref": "#/properties/scriptId"
+        },
+        "confirmDelete": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": ["scriptId", "deploymentId", "confirmDelete"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "deploymentId": "scratch-deployment",
+      "confirmDelete": true
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {}
+    }
+  },
+  {
+    "name": "script_run",
+    "description": "Run a function; may change data. Requires an API-executable deployment and the SAME standard GCP project as the OAuth client; token must cover ALL script scopes. No service accounts. devMode is for the script owner. A run can return Operation.error despite HTTP 200. OAuth: All OAuth scopes declared/used by the target script (no universal script.run scope). Requires APPS_SCRIPT_ENABLE_WRITES=true.",
+    "write": true,
+    "scopes": [
+      "All OAuth scopes declared/used by the target script (no universal script.run scope)"
+    ],
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scriptId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,256}$"
+        },
+        "functionName": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,255}$"
+        },
+        "parameters": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {},
+              "maxItems": 100
+            },
+            {
+              "allOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1048576
+                },
+                {
+                  "$ref": "#/properties/parameters/anyOf/0"
+                }
+              ]
+            }
+          ]
+        },
+        "devMode": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": ["scriptId", "functionName"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "example": {
+      "scriptId": "scratch-script",
+      "functionName": "ping"
+    },
+    "mockOutput": {
+      "mode": "mock",
+      "data": {
+        "done": true,
+        "response": {
+          "result": "pong"
+        }
+      }
+    }
+  }
+]

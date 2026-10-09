@@ -1,222 +1,275 @@
-/**
- * Google Apps Script REST API Client
- * Base URL: https://script.googleapis.com/v1
- * Auth: OAuth 2.0 access token (Bearer)
- *
- * API Reference: https://developers.google.com/apps-script/api/reference/rest
- */
+import { createHash } from "node:crypto";
 
-const BASE_URL = 'https://script.googleapis.com/v1';
-
+export type Json =
+  null | boolean | number | string | Json[] | { [key: string]: Json };
+export type Query = Record<
+  string,
+  string | number | boolean | string[] | undefined
+>;
+export interface ScriptFile {
+  name: string;
+  type: "SERVER_JS" | "HTML" | "JSON";
+  source: string;
+}
+export interface Content {
+  files: ScriptFile[];
+  scriptId?: string;
+}
+export class ApiError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+    public status?: number,
+  ) {
+    super(message);
+  }
+}
+export const MAX_BYTES = 8 * 1024 * 1024;
+export function contentHash(files: ScriptFile[]): string {
+  return createHash("sha256")
+    .update(
+      JSON.stringify(
+        files
+          .map(({ name, type, source }) => ({ name, type, source }))
+          .sort(
+            (a, b) =>
+              a.name.localeCompare(b.name) || a.type.localeCompare(b.type),
+          ),
+      ),
+    )
+    .digest("hex");
+}
+export function identifier(value: string): string {
+  if (!/^[A-Za-z0-9_-]{1,256}$/.test(value))
+    throw new ApiError("invalid_input", "Invalid resource identifier");
+  return encodeURIComponent(value);
+}
 export class AppsScriptClient {
-  private accessToken: string;
-
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
+  readonly mode: "live" | "mock";
+  constructor(
+    private token: string,
+    private options: {
+      fetch?: typeof fetch;
+      writesEnabled?: boolean;
+      timeoutMs?: number;
+      mock?: boolean;
+    } = {},
+  ) {
+    if (!token || /[\r\n]/.test(token))
+      throw new ApiError(
+        "invalid_auth",
+        "A valid OAuth access token is required",
+      );
+    this.mode = options.mock ? "mock" : "live";
   }
-
-  private async request<T>(
-    endpoint: string,
-    options?: {
-      method?: string;
-      body?: any;
-      params?: Record<string, string | number | boolean | undefined>;
-    }
+  assertWrites(): void {
+    if (!this.options.writesEnabled)
+      throw new ApiError(
+        "writes_disabled",
+        "Writes and script execution are disabled. Set APPS_SCRIPT_ENABLE_WRITES=true on this server to enable them.",
+      );
+  }
+  async request<T = unknown>(
+    path: string,
+    method = "GET",
+    body?: unknown,
+    params: Query = {},
+    drive = false,
   ): Promise<T> {
-    const url = new URL(`${BASE_URL}${endpoint}`);
-    const method = options?.method || 'GET';
-
-    if (options?.params) {
-      Object.entries(options.params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          url.searchParams.append(key, String(value));
-        }
-      });
+    if (method !== "GET") this.assertWrites();
+    if (
+      !/^\/(?:projects(?:\/[A-Za-z0-9_-]+(?:\/(?:content|metrics|versions(?:\/\d+)?|deployments(?:\/[A-Za-z0-9_-]+)?))?)?|processes(?::listScriptProcesses)?|scripts\/[A-Za-z0-9_-]+:run)$/.test(
+        path,
+      ) &&
+      !(drive && path === "/files")
+    ) {
+      throw new ApiError("invalid_path", "Unsupported API resource");
     }
-
-    const headers: Record<string, string> = {
-      'Authorization': `Bearer ${this.accessToken}`,
-      'Accept': 'application/json',
-    };
-
-    if (options?.body) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    const response = await fetch(url.toString(), {
-      method,
-      headers,
-      body: options?.body ? JSON.stringify(options.body) : undefined,
-    });
-
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Apps Script API ${response.status}: ${text}`);
-    }
-
-    return response.json();
-  }
-
-  // === Projects ===
-
-  /**
-   * Create a new Apps Script project.
-   * If parentId is provided, creates the project bound to that Google Docs/Sheets/Slides/Forms file.
-   */
-  async createProject(title: string, parentId?: string) {
-    const body: any = { title };
-    if (parentId) body.parentId = parentId;
-    return this.request<any>('/projects', {
-      method: 'POST',
-      body,
-    });
-  }
-
-  /** Get metadata for a script project. */
-  async getProject(scriptId: string) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}`);
-  }
-
-  // === Content (pull/push) ===
-
-  /** Get the content of a script project (all files). Equivalent to clasp pull. */
-  async getContent(scriptId: string, versionNumber?: number) {
-    const params: Record<string, string | number | boolean | undefined> = {};
-    if (versionNumber !== undefined) params.versionNumber = versionNumber;
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/content`, { params });
-  }
-
-  /**
-   * Update the content of a script project (all files). Equivalent to clasp push.
-   * files: array of { name, type, source } where type is SERVER_JS, HTML, or JSON
-   */
-  async updateContent(scriptId: string, files: Array<{ name: string; type: string; source: string }>) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/content`, {
-      method: 'PUT',
-      body: { files },
-    });
-  }
-
-  // === Versions ===
-
-  /** List all versions of a script project. */
-  async listVersions(scriptId: string, pageSize?: number, pageToken?: string) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/versions`, {
-      params: { pageSize, pageToken },
-    });
-  }
-
-  /** Create a new immutable version of the script. */
-  async createVersion(scriptId: string, description?: string) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/versions`, {
-      method: 'POST',
-      body: { description },
-    });
-  }
-
-  /** Get a specific version. */
-  async getVersion(scriptId: string, versionNumber: number) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/versions/${versionNumber}`);
-  }
-
-  // === Deployments ===
-
-  /** List all deployments of a script project. */
-  async listDeployments(scriptId: string, pageSize?: number, pageToken?: string) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/deployments`, {
-      params: { pageSize, pageToken },
-    });
-  }
-
-  /** Create a deployment (requires a version number). */
-  async createDeployment(scriptId: string, versionNumber: number, description?: string, manifestFileName?: string) {
-    const config: any = {
-      versionNumber,
-      description: description || '',
-    };
-    if (manifestFileName) config.manifestFileName = manifestFileName;
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/deployments`, {
-      method: 'POST',
-      body: { versionNumber: config.versionNumber, description: config.description, manifestFileName: config.manifestFileName },
-    });
-  }
-
-  /** Get a specific deployment. */
-  async getDeployment(scriptId: string, deploymentId: string) {
-    return this.request<any>(
-      `/projects/${encodeURIComponent(scriptId)}/deployments/${encodeURIComponent(deploymentId)}`
+    if (drive && path !== "/files")
+      throw new ApiError("invalid_path", "Unsupported Drive resource");
+    const url = new URL(
+      (drive
+        ? "https://www.googleapis.com/drive/v3"
+        : "https://script.googleapis.com/v1") + path,
     );
-  }
-
-  /** Update a deployment to point to a new version. */
-  async updateDeployment(scriptId: string, deploymentId: string, versionNumber: number, description?: string) {
-    return this.request<any>(
-      `/projects/${encodeURIComponent(scriptId)}/deployments/${encodeURIComponent(deploymentId)}`,
-      {
-        method: 'PUT',
-        body: {
-          deploymentConfig: {
-            versionNumber,
-            description: description || '',
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined) continue;
+      for (const item of Array.isArray(value) ? value : [value])
+        url.searchParams.append(key, String(item));
+    }
+    const payload = body === undefined ? undefined : JSON.stringify(body);
+    if (payload && Buffer.byteLength(payload) > MAX_BYTES)
+      throw new ApiError("request_too_large", "Request exceeds 8 MiB");
+    const timeout =
+      this.options.timeoutMs ?? (path.endsWith(":run") ? 370_000 : 30_000);
+    for (let attempt = 0; ; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await (this.options.fetch ?? fetch)(url, {
+          method,
+          redirect: "error",
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+            Accept: "application/json",
+            ...(payload ? { "Content-Type": "application/json" } : {}),
           },
-        },
+          body: payload,
+        });
+        if (
+          method === "GET" &&
+          attempt < 2 &&
+          [429, 502, 503, 504].includes(response.status)
+        ) {
+          await response.body?.cancel();
+          await new Promise((resolve) =>
+            setTimeout(resolve, 100 * (attempt + 1)),
+          );
+          continue;
+        }
+        if (!response.ok) {
+          await response.body?.cancel();
+          const hint =
+            response.status === 403
+              ? " Check consent scopes, project permissions, Cloud API enablement, and https://script.google.com/home/usersettings."
+              : "";
+          throw new ApiError(
+            `upstream_${response.status}`,
+            `Google API returned HTTP ${response.status}.${hint}`,
+            response.status,
+          );
+        }
+        if (response.status === 204) return {} as T;
+        const reader = response.body?.getReader();
+        const chunks: Uint8Array[] = [];
+        let bytes = 0;
+        if (reader) {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            bytes += value.byteLength;
+            if (bytes > MAX_BYTES) {
+              await reader.cancel();
+              throw new ApiError(
+                "response_too_large",
+                "Response exceeds 8 MiB; request a smaller page",
+              );
+            }
+            chunks.push(value);
+          }
+        }
+        try {
+          return JSON.parse(Buffer.concat(chunks).toString("utf8")) as T;
+        } catch {
+          throw new ApiError(
+            "invalid_response",
+            "Google API returned malformed JSON",
+          );
+        }
+      } catch (error) {
+        if (error instanceof ApiError) throw error;
+        throw new ApiError(
+          controller.signal.aborted ? "timeout" : "transport_error",
+          controller.signal.aborted
+            ? "Google API request timed out; a write may have completed. Inspect remote state before retrying."
+            : "Google API transport unavailable",
+        );
+      } finally {
+        clearTimeout(timer);
       }
-    );
+    }
   }
-
-  /** Delete a deployment. */
-  async deleteDeployment(scriptId: string, deploymentId: string) {
-    return this.request<any>(
-      `/projects/${encodeURIComponent(scriptId)}/deployments/${encodeURIComponent(deploymentId)}`,
-      { method: 'DELETE' }
+  async getContent(
+    scriptId: string,
+    versionNumber?: number,
+  ): Promise<Content & { contentHash: string }> {
+    const content = await this.request<Content>(
+      `/projects/${identifier(scriptId)}/content`,
+      "GET",
+      undefined,
+      { versionNumber },
     );
+    if (!Array.isArray(content.files))
+      throw new ApiError(
+        "invalid_response",
+        "Content response is missing files",
+      );
+    return { ...content, contentHash: contentHash(content.files) };
   }
-
-  // === Execution / Run ===
-
-  /**
-   * Run a function in a script project.
-   * The script must be deployed as an API executable.
-   */
-  async runFunction(scriptId: string, functionName: string, parameters?: any[], devMode?: boolean) {
-    return this.request<any>(`/scripts/${encodeURIComponent(scriptId)}:run`, {
-      method: 'POST',
-      body: {
-        function: functionName,
-        parameters: parameters || [],
-        devMode: devMode || false,
+  async updateContent(
+    scriptId: string,
+    files: ScriptFile[],
+    mode: "upsert" | "replace",
+    expectedContentHash?: string,
+  ): Promise<unknown> {
+    this.assertWrites();
+    let merged = files;
+    if (mode === "upsert" || expectedContentHash) {
+      const current = await this.getContent(scriptId);
+      if (expectedContentHash && current.contentHash !== expectedContentHash)
+        throw new ApiError(
+          "content_conflict",
+          "HEAD changed since your read. Pull again and merge before retrying.",
+        );
+      if (mode === "upsert") {
+        const byName = new Map(
+          current.files.map(({ name, type, source }) => [
+            `${type}:${name}`,
+            { name, type, source },
+          ]),
+        );
+        for (const file of files) byName.set(`${file.type}:${file.name}`, file);
+        merged = [...byName.values()];
+      }
+    }
+    const manifest = merged.find(
+      (file) => file.name === "appsscript" && file.type === "JSON",
+    );
+    if (!manifest)
+      throw new ApiError(
+        "invalid_manifest",
+        "The final file set must contain appsscript of type JSON",
+      );
+    try {
+      const value: unknown = JSON.parse(manifest.source);
+      if (!value || typeof value !== "object" || Array.isArray(value))
+        throw new Error();
+    } catch {
+      throw new ApiError(
+        "invalid_manifest",
+        "appsscript source must be a JSON object",
+      );
+    }
+    return this.request(`/projects/${identifier(scriptId)}/content`, "PUT", {
+      files: merged,
+    });
+  }
+  async updateDeployment(
+    scriptId: string,
+    deploymentId: string,
+    versionNumber: number,
+    description?: string,
+    manifestFileName?: string,
+  ): Promise<unknown> {
+    this.assertWrites();
+    const path = `/projects/${identifier(scriptId)}/deployments/${identifier(deploymentId)}`;
+    const current = await this.request<{
+      deploymentConfig?: { description?: string; manifestFileName?: string };
+    }>(path);
+    if (!current.deploymentConfig)
+      throw new ApiError(
+        "invalid_response",
+        "Deployment response is missing deploymentConfig",
+      );
+    return this.request(path, "PUT", {
+      deploymentConfig: {
+        scriptId,
+        versionNumber,
+        description: description ?? current.deploymentConfig.description,
+        manifestFileName:
+          manifestFileName ?? current.deploymentConfig.manifestFileName,
       },
-    });
-  }
-
-  // === Processes (logs) ===
-
-  /** List recent script execution processes. */
-  async listProcesses(pageSize?: number, pageToken?: string) {
-    return this.request<any>('/processes', {
-      params: { pageSize, pageToken },
-    });
-  }
-
-  /** List processes for a specific script. */
-  async listScriptProcesses(scriptId: string, pageSize?: number, pageToken?: string) {
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/processes`, {
-      params: { pageSize, pageToken },
-    });
-  }
-
-  // === Metrics ===
-
-  /** Get metrics for a script project (execution counts, errors, etc.). */
-  async getMetrics(scriptId: string, metricsGranularity?: string) {
-    const filter: Record<string, string | number | boolean | undefined> = {};
-    if (metricsGranularity) filter['metricsGranularity'] = metricsGranularity;
-    return this.request<any>(`/projects/${encodeURIComponent(scriptId)}/metrics`, {
-      params: filter,
     });
   }
 }

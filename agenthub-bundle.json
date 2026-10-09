@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "name": "appsscript",
+  "displayName": "Google Apps Script",
+  "version": "3.0.0",
+  "description": "Manage Apps Script projects, files, versions, deployments and execution history through Google REST APIs.",
+  "category": "Productivity",
+  "transport": "http",
+  "url": "https://appsscriptmcp.agenticledger.ai/mcp",
+  "repository": "https://github.com/agenticledger/appsscript-mcp-http",
+  "brokerProvider": "google-appsscript",
+  "brokerKind": "oauth",
+  "brokerClientNamespace": "google-mcp-prod",
+  "toolCount": 17,
+  "tools": [
+    {
+      "name": "project_get",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects",
+        "https://www.googleapis.com/auth/script.projects.readonly"
+      ],
+      "write": false
+    },
+    {
+      "name": "content_get",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects",
+        "https://www.googleapis.com/auth/script.projects.readonly"
+      ],
+      "write": false
+    },
+    {
+      "name": "versions_list",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects",
+        "https://www.googleapis.com/auth/script.projects.readonly"
+      ],
+      "write": false
+    },
+    {
+      "name": "version_get",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects",
+        "https://www.googleapis.com/auth/script.projects.readonly"
+      ],
+      "write": false
+    },
+    {
+      "name": "deployments_list",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.deployments",
+        "https://www.googleapis.com/auth/script.deployments.readonly"
+      ],
+      "write": false
+    },
+    {
+      "name": "deployment_get",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.deployments",
+        "https://www.googleapis.com/auth/script.deployments.readonly"
+      ],
+      "write": false
+    },
+    {
+      "name": "processes_list",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.processes"
+      ],
+      "write": false
+    },
+    {
+      "name": "script_processes_list",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.processes"
+      ],
+      "write": false
+    },
+    {
+      "name": "metrics_get",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.metrics"
+      ],
+      "write": false
+    },
+    {
+      "name": "projects_search",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive.readonly",
+        "https://www.googleapis.com/auth/drive.file"
+      ],
+      "write": false
+    },
+    {
+      "name": "project_create",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects"
+      ],
+      "write": true
+    },
+    {
+      "name": "content_update",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects"
+      ],
+      "write": true
+    },
+    {
+      "name": "version_create",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.projects"
+      ],
+      "write": true
+    },
+    {
+      "name": "deployment_create",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.deployments"
+      ],
+      "write": true
+    },
+    {
+      "name": "deployment_update",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.deployments"
+      ],
+      "write": true
+    },
+    {
+      "name": "deployment_delete",
+      "scopes": [
+        "https://www.googleapis.com/auth/script.deployments"
+      ],
+      "write": true
+    },
+    {
+      "name": "script_run",
+      "scopes": [
+        "All OAuth scopes declared/used by the target script (no universal script.run scope)"
+      ],
+      "write": true
+    }
+  ],
+  "local": {
+    "command": "node",
+    "args": [
+      "dist/hub-server.js"
+    ]
+  },
+  "writeEnableEnv": "APPS_SCRIPT_ENABLE_WRITES=true",
+  "publishingStatus": "handoff-only; not an AgentHub or PlatformAuth publication receipt"
+}

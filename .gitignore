@@ -1,4 +1,6 @@
 node_modules/
 dist/
 .env
-DEPLOYMENT.md
+.env.*
+!.env.example
+.npm-cache/

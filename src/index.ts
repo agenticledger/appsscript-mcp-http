@@ -29,7 +29,7 @@ app.get("/health", (_req, res) =>
     brokerProvider,
     clientNamespace: brokerClientNamespace || null,
     principalHeader: "x-broker-principal",
-    principalSignatureRequired: true,
+    principalSignatureRequired: !!process.env.BROKER_PRINCIPAL_HMAC_KEY,
     signedPrincipalConfigured: !!process.env.BROKER_PRINCIPAL_HMAC_KEY,
     standaloneCallerKeySupported: true,
     writesEnabled,
@@ -48,7 +48,7 @@ app.get("/", (_req, res) =>
       model: "broker-first",
       alternatives: [
         "Per-request Google OAuth Bearer",
-        "Signed broker principal",
+        "Broker principal (HMAC required when configured)",
         "Private persistent X-MCP-Caller-Key (32 random bytes, base64url)",
       ],
     },
@@ -76,7 +76,7 @@ app.post("/mcp", async (req, res) => {
         status: "identity_required",
         provider: brokerProvider,
         message:
-          "Provide a Google OAuth Bearer, a gateway-signed broker principal, or a private persistent X-MCP-Caller-Key (32 random bytes encoded as base64url). Anonymous callers cannot share a broker account.",
+          "Provide a Google OAuth Bearer, an executor-stamped broker principal (HMAC required when configured), or a private persistent X-MCP-Caller-Key (32 random bytes encoded as base64url). Anonymous callers cannot share a broker account.",
       };
     const credential =
       identity.kind === "bearer"

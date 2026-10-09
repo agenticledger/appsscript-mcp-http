@@ -26,21 +26,19 @@ export function requestIdentity(
     throw new Error("Invalid broker account label");
   const principal = header("x-broker-principal");
   if (principal) {
-    if (!hmacKey)
-      throw new Error(
-        "Signed principal mode is not configured. Use Google Bearer passthrough or a private X-MCP-Caller-Key.",
-      );
     if (principal.length > 512 || !principal.trim() || /[\r\n]/.test(principal))
       throw new Error("Invalid principal");
-    const signature = header("x-broker-principal-sig") ?? "";
-    const expected = createHmac("sha256", hmacKey)
-      .update(principal)
-      .digest("base64url");
-    if (
-      signature.length !== expected.length ||
-      !timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
-    )
-      throw new Error("Invalid principal signature");
+    if (hmacKey) {
+      const signature = header("x-broker-principal-sig") ?? "";
+      const expected = createHmac("sha256", hmacKey)
+        .update(principal)
+        .digest("base64url");
+      if (
+        signature.length !== expected.length ||
+        !timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+      )
+        throw new Error("Invalid principal signature");
+    }
     return { kind: "broker", principal, account };
   }
   const callerKey = header("x-mcp-caller-key");

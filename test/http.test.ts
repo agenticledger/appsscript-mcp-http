@@ -8,15 +8,28 @@ import { requestIdentity } from "../src/auth.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 const req = (headers: Request["headers"]) => ({ headers });
-test("per-request Bearer auth, signed principal isolation, no shared default", () => {
+test("per-request Bearer auth, optional HMAC enforcement, no shared default", () => {
   assert.deepEqual(requestIdentity(req({})), { kind: "none" });
   assert.deepEqual(
     requestIdentity(req({ authorization: "Bearer test-token" })),
     { kind: "bearer", token: "test-token" },
   );
   assert.throws(() => requestIdentity(req({ authorization: "Basic nope" })));
-  assert.throws(() =>
+  assert.deepEqual(
     requestIdentity(req({ "x-broker-principal": "tenant:alice" }), ""),
+    { kind: "broker", principal: "tenant:alice", account: "" },
+  );
+  assert.throws(
+    () =>
+      requestIdentity(
+        req({ "x-broker-principal": "tenant:alice" }),
+        "configured-key",
+      ),
+    /Invalid principal signature/,
+  );
+  assert.throws(
+    () => requestIdentity(req({ "x-broker-principal": " " }), ""),
+    /Invalid principal/,
   );
   const key = "offline-hmac-key";
   const principal = "tenant:alice";
@@ -85,7 +98,7 @@ test("HTTP initialize/list, stateless call, anonymous isolation, writes disabled
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-broker-principal": "victim",
+        "x-broker-principal": "a".repeat(513),
       },
       body: "{}",
     });
